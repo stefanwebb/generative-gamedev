@@ -37,6 +37,7 @@ class MotionDiffusionModel(nn.Module):
             dim_feedforward=dim_feedforward,
             dropout=dropout,
             activation=activation,
+            # batch_first=True,
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
