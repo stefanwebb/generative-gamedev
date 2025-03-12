@@ -80,7 +80,7 @@ class MotionDiffusionModel(nn.Module):
         """
 
         bs, njoints, nfeats, nframes = x.shape
-        time_emb = self.embed_timestep(timesteps)  # [1, bs=6, d=512]
+        time_emb = self.timestep_encoder(timesteps)  # [1, bs=6, d=512]
 
         # TODO: Masking frames, dimensions
         text_emb = self.text_proj(y["text_embed"])
@@ -88,7 +88,6 @@ class MotionDiffusionModel(nn.Module):
         emb = text_emb + time_emb
 
         # TODO: Move reshaping, reordering to data pipeline (i.e. outside model code)
-        bs, njoints, nfeats, nframes = x.shape
         x = x.permute((3, 0, 1, 2)).reshape(nframes, bs, njoints * nfeats)
         x = self.input_proj(x)
 
@@ -104,7 +103,7 @@ class MotionDiffusionModel(nn.Module):
         output = self.output_proj(output)
 
         # TODO: Move reshaping, reordering to data pipeline
-        output = output.reshape(nframes, bs, self.njoints, self.nfeats)
+        output = output.reshape(nframes, bs, njoints, nfeats)
         output = output.permute(1, 2, 3, 0)  # [bs, njoints, nfeats, nframes]
 
         return output
