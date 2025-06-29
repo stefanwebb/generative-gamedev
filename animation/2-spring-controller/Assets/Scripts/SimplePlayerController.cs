@@ -19,12 +19,24 @@ namespace StefanWebb
         private Vector2 velocityTarget = Vector2.zero;
         private Vector2 acceleration = Vector2.zero;
 
+        // NOTE: pastPosition stores local position
+        // whereas futurePosition is offset relative to current
+        private int startIdxPastPosition = 0;
+        private Vector2[] pastPosition = new Vector2[30];
+        private Vector2[] futurePosition = new Vector2[30];
+
+
         private float deltaTimeAcc = 0f;
         private float playerUpdatePeriod = 0.033f;
 
         void Start()
         {
-
+            // TODO: Way to do this during intialization?
+            for (int i = 0; i < 30; i++)
+            {
+                pastPosition[i] = transform.localPosition;
+                futurePosition[i] = Vector2.zero;
+            }
         }
 
         void Update()
@@ -40,11 +52,21 @@ namespace StefanWebb
                 multiple numerical integration steps.
                 */
 
+                // DEBUG: Store previous second of movement
+                // TODO: Can I move this to OnDrawGizmos?
+                pastPosition[startIdxPastPosition].x = transform.position.x;
+                pastPosition[startIdxPastPosition].y = transform.position.z;
+                startIdxPastPosition++;
+
+                if (startIdxPastPosition >= 30)
+                {
+                    startIdxPastPosition = 0;
+                }
+
                 // DEBUG
-                Debug.Log($"Pos: {transform.localPosition}, Vel: {velocity}, Acc: {acceleration}");
+                // Debug.Log($"Pos: {transform.localPosition}, Vel: {velocity}, Acc: {acceleration}");
 
                 // TODO: Factor out this block into fn
-
 
                 // Set target velocity according to joystick position
                 // TODO: Compare this to adding callback
@@ -58,13 +80,20 @@ namespace StefanWebb
                 velocity = newVelocity;
                 acceleration = newAcceleration;
 
-
                 deltaTimeAcc = 0;
 
                 // TODO: Rotate object based on velocity direction
                 if (velocity.magnitude > 0.001 * scaleVelocity)
                 {
                     transform.forward = new Vector3(velocity.x, 0, velocity.y).normalized;
+                }
+
+                // DEBUG: Predict next second of movement
+                // TODO: Does this actually work?
+                // futurePosition[0] = new Vector3(deltaPosition.x, 0, deltaPosition.y);
+                for (int i = 0; i < 30; i++)
+                {
+                    (futurePosition[i], _, _) = critically_damped_spring_controller_2d(Vector2.zero, velocity, acceleration, velocityTarget, springHalflife, 1f / 30f * i);
                 }
             }
         }
@@ -100,6 +129,8 @@ namespace StefanWebb
             Vector2 c2 = acceleration + c1 * lambda;
             float eydt = fast_negexp(lambda * deltaTime);
 
+            // TODO: Check that this is a stable int method
+            // Should position and velocity calcs be switched?
             Vector2 newPosition = eydt * (((-c2) / (lambda * lambda)) + ((-c1 - c2 * deltaTime) / lambda)) +
                 (c2 / (lambda * lambda)) + c1 / lambda + velocityTarget * deltaTime + position;
             Vector2 newVelocity = eydt * (c1 + c2 * deltaTime) + velocityTarget;
@@ -123,6 +154,42 @@ namespace StefanWebb
             Handles.DrawWireDisc(transform.position, new Vector3(0, 1, 0), 1, 2f);
 
             // Handles.ArrowHandleCap(0, transform.position, transform.rotation, 0.5f, EventType.Repaint);
+
+            // Visualize predicted path
+            // TODO: Use draw lines method?
+            Handles.color = Color.white;
+            for (int i = 1; i < 30; i++)
+            {
+                Handles.DrawLine(transform.position + new Vector3(futurePosition[i - 1].x, 0, futurePosition[i - 1].y), transform.position + new Vector3(futurePosition[i].x, 0, futurePosition[i].y), 2f);
+            }
+
+            // Visualize past path
+            // TODO: Use draw lines method?
+            // TODO: Don't hardcode 30 segments
+            Handles.color = Color.purple;
+
+            for (int i = 0; i < 29; i++)
+            {
+                int fromIdx2 = (30 + startIdxPastPosition + i) % 30;
+                int toIdx = (30 + startIdxPastPosition + i + 1) % 30;
+
+                Handles.DrawLine(new Vector3(pastPosition[fromIdx2].x, 0, pastPosition[fromIdx2].y), new Vector3(pastPosition[toIdx].x, 0, pastPosition[toIdx].y), 2f);
+            }
+
+            // DEBUG: Checking where past positions are
+
+            // Debug.Log($"{(30 + startIdxPastPosition - 1) % 30}");
+            int fromIdx = (30 + startIdxPastPosition - 1) % 30;
+            Handles.DrawWireDisc(new Vector3(pastPosition[fromIdx].x, 0, pastPosition[fromIdx].y), new Vector3(0, 1, 0), 0.25f, 2f);
+
+            Handles.DrawWireDisc(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(0, 1, 0), 0.25f, 2f);
+
+            Handles.DrawLine(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(pastPosition[fromIdx].x, 0, pastPosition[fromIdx].y), 2f);
+
+
+            // TODO: Must be able to always get current position into past position array
+            // int firstIdxPastPosition = (30 + startIdxPastPosition - 1) % 30;
+            // Handles.DrawLine(new Vector3(pastPosition[firstIdxPastPosition].x, 0, pastPosition[firstIdxPastPosition].y), new Vector3(transform.position.x, 0, transform.position.y), 2f);
 
             // Visualize target velocity
             Handles.color = Color.green;
