@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b6927bd8e840d354bae2c3e4598f62cf
+timeCreated: 1498145079
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Resources/Blockout/Shaders/Area_Comment_Wireframe.shader
+  uploadId: 226859

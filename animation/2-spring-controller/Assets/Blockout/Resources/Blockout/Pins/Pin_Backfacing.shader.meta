@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 296f8313c01d2e3489e5c25b5ee9b71c
+timeCreated: 1498840166
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Resources/Blockout/Pins/Pin_Backfacing.shader
+  uploadId: 226859

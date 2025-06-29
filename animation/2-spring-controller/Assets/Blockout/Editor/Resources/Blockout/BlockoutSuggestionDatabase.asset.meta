@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 557ef4178dd0478459b91b358f6ac500
+timeCreated: 1515852492
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Editor/Resources/Blockout/BlockoutSuggestionDatabase.asset
+  uploadId: 226859

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 34a41adb962323d4eb748f1d7994322b
+timeCreated: 1506345332
+licenseType: Store
+ShaderImporter:
+  defaultTextures:
+  - _Tex: {fileID: 2800000, guid: 28c7aad1372ff114b90d330f8a2dd938, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Resources/Blockout/Shaders/Blockout_Water.shader
+  uploadId: 226859

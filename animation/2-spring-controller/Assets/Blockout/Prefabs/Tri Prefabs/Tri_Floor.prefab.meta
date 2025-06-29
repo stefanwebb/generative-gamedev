@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 5a87460222b6d7d44a586fcde91560b8
+timeCreated: 1497357198
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Prefabs/Tri Prefabs/Tri_Floor.prefab
+  uploadId: 226859

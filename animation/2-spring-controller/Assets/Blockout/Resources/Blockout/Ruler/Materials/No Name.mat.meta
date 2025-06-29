@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: fce9265656f01dc41883147f7b1b9a0f
+timeCreated: 1508176755
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Resources/Blockout/Ruler/Materials/No Name.mat
+  uploadId: 226859

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: fd452f6fc5ec26c4aa87517d7568f1c7
+timeCreated: 1496760808
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Prefabs/Pipes/Pipe_Bend_1x05x05.prefab
+  uploadId: 226859

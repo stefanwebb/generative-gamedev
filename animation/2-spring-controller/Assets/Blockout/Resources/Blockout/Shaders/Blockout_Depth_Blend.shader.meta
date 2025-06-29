@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d62fdfc5751f97443ad77a8d8401e9a9
+timeCreated: 1506345671
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Resources/Blockout/Shaders/Blockout_Depth_Blend.shader
+  uploadId: 226859

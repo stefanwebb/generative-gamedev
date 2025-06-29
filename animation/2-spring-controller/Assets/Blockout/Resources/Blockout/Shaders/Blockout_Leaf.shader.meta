@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a93c6335430a6ab47b3b71c7c3e38499
+timeCreated: 1496760174
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 110375
+  packageName: Blockout Lite
+  packageVersion: 1.0
+  assetPath: Assets/Blockout/Resources/Blockout/Shaders/Blockout_Leaf.shader
+  uploadId: 226859
