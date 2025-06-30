@@ -1,4 +1,13 @@
+/*
+© 2025, Stefan Webb. Some Rights Reserved.
+
+Except where otherwise noted, this work is licensed under a
+Creative Commons Attribution-ShareAlike 4.0 International License
+https://creativecommons.org/licenses/by-sa/4.0/deed.en
+
+*/
 using System;
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,15 +22,25 @@ namespace StefanWebb
         private float scaleVelocity = 1f;
 
         [SerializeField]
-        private float springHalflife = 0.1f;
+        private float velocityHalflife = 0.1f;
+
+        [SerializeField]
+        private float rotationHalflife = 0.05f;
+
+        private float velocityLambda;
+        private float rotationLambda;
 
         private Vector2 velocity = Vector2.zero;
         private Vector2 velocityTarget = Vector2.zero;
         private Vector2 acceleration = Vector2.zero;
 
         // TODO: How does this relate to "angular velocity"?
-        private Quaternion forwardTarget = Quaternion.identity; // new Vector2(0, 1f);
-        private Quaternion forwardVelocity = new Quaternion(0, 0, 0, 0); // Vector2.zero;
+        private Quaternion forward = Quaternion.identity;
+        private Quaternion forwardTarget = Quaternion.identity;
+        float3 angularVelocity = float3.zero;
+
+        // TODO: Difference between float3 and Vector3?
+        // Difference between quaternion and Quaternion?
 
         // NOTE: pastPosition stores local position
         // whereas futurePosition is offset relative to current
@@ -35,6 +54,9 @@ namespace StefanWebb
 
         void Start()
         {
+            velocityLambda = SpringPhysics.halflife_to_damping(velocityHalflife) / 2.0f;
+            rotationLambda = SpringPhysics.halflife_to_damping(rotationHalflife) / 2.0f;
+
             // TODO: Way to do this during intialization?
             for (int i = 0; i < 30; i++)
             {
@@ -67,9 +89,6 @@ namespace StefanWebb
                     startIdxPastPosition = 0;
                 }
 
-                // DEBUG
-                // Debug.Log($"Pos: {transform.localPosition}, Vel: {velocity}, Acc: {acceleration}");
-
                 // TODO: Factor out this block into fn
 
                 // Set target velocity according to joystick position
@@ -77,7 +96,7 @@ namespace StefanWebb
                 Vector2 inputDirection = inputManager.PlayerControls.Player.Move.ReadValue<Vector2>();
                 velocityTarget = scaleVelocity * inputDirection;
 
-                (Vector2 deltaPosition, Vector2 newVelocity, Vector2 newAcceleration) = critically_damped_spring_controller_2d(Vector2.zero, velocity, acceleration, velocityTarget, springHalflife, deltaTimeAcc);
+                (Vector2 deltaPosition, Vector2 newVelocity, Vector2 newAcceleration) = SpringPhysics.critically_damped_velocity(Vector2.zero, velocity, acceleration, velocityTarget, velocityLambda, deltaTimeAcc);
 
                 // Update object state
                 transform.localPosition += new Vector3(deltaPosition.x, 0, deltaPosition.y);
@@ -89,9 +108,13 @@ namespace StefanWebb
                 {
                     forwardTarget = Quaternion.LookRotation(new Vector3(velocity.x, 0, velocity.y).normalized, Vector3.up);
                     // transform.forward = forwardTarget * Vector3.forward;
+
+                    (forward, angularVelocity) = SpringPhysics.critically_damped_rotation(forward, angularVelocity, forwardTarget, rotationLambda, deltaTimeAcc);
                 }
 
-                transform.forward = Vector3.Slerp(transform.forward, forwardTarget * Vector3.forward, Math.Min(deltaTimeAcc / 0.075f, 1f));
+                transform.forward = forward * Vector3.forward;
+
+                // transform.forward = Vector3.Slerp(transform.forward, forwardTarget * Vector3.forward, Math.Min(deltaTimeAcc / 0.075f, 1f));
 
                 deltaTimeAcc = 0;
 
@@ -108,78 +131,11 @@ namespace StefanWebb
             // futurePosition[0] = new Vector3(deltaPosition.x, 0, deltaPosition.y);
             for (int i = 0; i < 30; i++)
             {
-                (futurePosition[i], _, _) = critically_damped_spring_controller_2d(Vector2.zero, velocity, acceleration, velocityTarget, springHalflife, 1f / 30f * i);
+                (futurePosition[i], _, _) = SpringPhysics.critically_damped_velocity(Vector2.zero, velocity, acceleration, velocityTarget, velocityLambda, 1f / 30f * i);
             }
         }
 
-        float halflife_to_damping(float halflife, float eps = 1e-5f)
-        {
-            return (4.0f * 0.69314718056f) / (halflife + eps);
-        }
 
-        float fast_negexp(float x)
-        {
-            return 1.0f / (1.0f + x + 0.48f * x * x + 0.235f * x * x * x);
-        }
-
-        (Vector2, Vector2, Vector2) critically_damped_spring_controller_2d(
-            Vector2 position,
-            Vector2 velocity,
-            Vector2 acceleration,
-            Vector2 velocityTarget,
-            float halflife,
-            float deltaTime)
-        {
-            /*
-                Applies the force of a critically damped free spring to the displacement of the current velocity to the target velocity.
-
-                Returns the change in position, velocity, and acceleration.
-
-                TODO: Move this function into a physics script
-            */
-
-            float lambda = halflife_to_damping(halflife) / 2.0f;
-            Vector2 c1 = velocity - velocityTarget;
-            Vector2 c2 = acceleration + c1 * lambda;
-            float eydt = fast_negexp(lambda * deltaTime);
-
-            // TODO: Check that this is a stable int method
-            // Should position and velocity calcs be switched?
-            Vector2 newPosition = eydt * (((-c2) / (lambda * lambda)) + ((-c1 - c2 * deltaTime) / lambda)) +
-                (c2 / (lambda * lambda)) + c1 / lambda + velocityTarget * deltaTime + position;
-            Vector2 newVelocity = eydt * (c1 + c2 * deltaTime) + velocityTarget;
-            Vector2 newAcceleration = eydt * (acceleration - c2 * lambda * deltaTime);
-            return (newPosition, newVelocity, newAcceleration);
-        }
-
-        (Vector2, Vector2) critically_damped_spring_2d(
-            Vector2 position,
-            Vector2 velocity,
-            Vector2 positionTarget,
-            float halflife,
-            float deltaTime)
-        {
-            /*
-                Applies the force of a critically damped free spring to the
-                displayment of an arbitrary vector to a target vector.
-
-                Returns the change in position and velocity.
-
-                TODO: Move this function into a physics script
-            */
-
-            float lambda = halflife_to_damping(halflife) / 2.0f;
-            Vector2 c1 = position - positionTarget;
-            Vector2 c2 = velocity + c1 * lambda;
-            float eydt = fast_negexp(lambda * deltaTime);
-
-            // TODO: Check that this is a stable int method
-            // Should position and velocity calcs be switched?
-
-            Vector2 newPosition = eydt * (c1 + c2 * deltaTime) + positionTarget;
-            Vector2 newVelocity = eydt * (velocity - c2 * lambda * deltaTime);
-            return (newPosition, newVelocity);
-        }
 
         // (Vector2, Vector2) critically_damped_spring_quaternion(
         //     Quaternion rotation,
